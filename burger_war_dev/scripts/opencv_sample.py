@@ -129,8 +129,54 @@ if __name__ == '__main__':
 
     r = rospy.Rate(1)
     while not rospy.is_shutdown():
-        print(type(bot.img))
-        imgMsg = bot.bridge.cv2_to_imgmsg(bot.img, "bgr8")
-        bot.image_pub.publish(imgMsg)
+        bgr_image = bot.img
+        hsv_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2HSV)
+        lower = np.array([-30, 100, 50])
+        upper = np.array([30, 255, 255])
+        mask_image = cv2.inRange(hsv_image, lower, upper)
+        processed_image = cv2.bitwise_and(bgr_image, bgr_image, mask=mask_image)
+
+        edges = cv2.Canny(processed_image,100,200)
+        cv2.imshow("edges image", edges)
+        cv2.waitKey(1)
+        sum_x, sum_y= 0, 0
+        num = 0.00001 # 0除算を防ぐため
+#        """
+        for x in range(0, edges.shape[0]):
+            for y in range(0, edges.shape[1]):
+                if edges[x][y] > 0:
+                    sum_x = sum_x + x
+                    sum_y = sum_y + y
+                    num = num + 1
+        cx = int(sum_x/num)
+        cy = int(sum_y/num)
+
+        print(cx, cy)
+#        """
+
+        
+        #重心求める
+        """ # うまく行かなかった
+        ret,thresh = cv2.threshold(processed_image,127,255,cv2.THRESH_BINARY)
+        print(type(thresh))
+        imgEdge,contours,hierarchy = cv2.findContours(thresh, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE)
+
+        cnt = contours[0]
+        M = cv2.moments(cnt)
+
+        # 重心の座標
+        cx = int(M['m10']/M['m00'])
+        cy = int(M['m01']/M['m00'])
+        """
+
+        color = (0, 255, 0)
+        processed_image = cv2.circle(processed_image, (cy, cx), 3, color, -1)
+
+        cv2.imshow("Image window", processed_image)
+        cv2.waitKey(1)
+
+
+        image_msg = bot.bridge.cv2_to_imgmsg(processed_image, "bgr8")
+        bot.image_pub.publish(image_msg)
 
         r.sleep()
