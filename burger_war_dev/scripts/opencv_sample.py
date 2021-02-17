@@ -21,6 +21,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
 import numpy as np
+import sys
 
 class AllSensorBot(object):
     def __init__(self, 
@@ -127,55 +128,43 @@ if __name__ == '__main__':
 #    bot.strategy()
 
 
-    r = rospy.Rate(1)
+    r = rospy.Rate(5)
     while not rospy.is_shutdown():
+        # AllSensorBotクラス の imageCallback関数で取得された画像データを取得
         bgr_image = bot.img
+
+        # HSV色空間に変換
         hsv_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2HSV)
-        lower = np.array([-30, 100, 50])
-        upper = np.array([30, 255, 255])
+
+        # 画像の二値化のための範囲指定。HSVで。
+#        lower = np.array([-30, 100, 50]) # red
+#        upper = np.array([30, 255, 255]) # red
+#        lower = np.array([30, 100, 50]) # yellow
+#        upper = np.array([50, 255, 255]) # yellow
+#        lower = np.array([120, 100, 50]) # blue
+#        upper = np.array([140, 255, 255]) # blue
+        lower = np.array([40, 100, 50]) # green
+        upper = np.array([60, 255, 255]) # green
+
+        # 値が指定した範囲内の画素は255、範囲外の画素を0にする二値化
         mask_image = cv2.inRange(hsv_image, lower, upper)
+
+        # 先程二値化した画像をマスク画像としてBGR画像を切り抜き
         processed_image = cv2.bitwise_and(bgr_image, bgr_image, mask=mask_image)
 
-        edges = cv2.Canny(processed_image,100,200)
-        cv2.imshow("edges image", edges)
-        cv2.waitKey(1)
-        sum_x, sum_y= 0, 0
-        num = 0.00001 # 0除算を防ぐため
-#        """
-        for x in range(0, edges.shape[0]):
-            for y in range(0, edges.shape[1]):
-                if edges[x][y] > 0:
-                    sum_x = sum_x + x
-                    sum_y = sum_y + y
-                    num = num + 1
-        cx = int(sum_x/num)
-        cy = int(sum_y/num)
-
+        # 重心を求める
+        mom = cv2.moments(mask_image)
+        cx, cy = 0, 0
+        if "m00" in mom and "m10" in mom and "m01" in mom and mom["m00"] <> 0:
+            cx = int(mom["m10"]/mom["m00"])
+            cy = int(mom["m01"]/mom["m00"])
         print(cx, cy)
-#        """
 
-        
-        #重心求める
-        """ # うまく行かなかった
-        ret,thresh = cv2.threshold(processed_image,127,255,cv2.THRESH_BINARY)
-        print(type(thresh))
-        imgEdge,contours,hierarchy = cv2.findContours(thresh, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE)
+        # 求めた重心の位置を示すために紫色の点を描画
+        color = (255, 0, 255)
+        processed_image = cv2.circle(processed_image, (cx, cy), 3, color, -1)
 
-        cnt = contours[0]
-        M = cv2.moments(cnt)
-
-        # 重心の座標
-        cx = int(M['m10']/M['m00'])
-        cy = int(M['m01']/M['m00'])
-        """
-
-        color = (0, 255, 0)
-        processed_image = cv2.circle(processed_image, (cy, cx), 3, color, -1)
-
-        cv2.imshow("Image window", processed_image)
-        cv2.waitKey(1)
-
-
+        # 加工した画像をROS Topicの形式に変換してpublish
         image_msg = bot.bridge.cv2_to_imgmsg(processed_image, "bgr8")
         bot.image_pub.publish(image_msg)
 
