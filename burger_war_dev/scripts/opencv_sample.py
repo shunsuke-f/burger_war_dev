@@ -23,6 +23,9 @@ import cv2
 import numpy as np
 import sys
 
+from geometry_msgs.msg import Twist
+
+
 class AllSensorBot(object):
     def __init__(self, 
                  use_lidar=False, use_camera=False, use_imu=False,
@@ -127,6 +130,9 @@ if __name__ == '__main__':
                        use_odom=False, use_joint_states=False)
 #    bot.strategy()
 
+    # velocity publisher
+    vel_pub = rospy.Publisher('cmd_vel', Twist,queue_size=1)
+
 
     r = rospy.Rate(5)
     while not rospy.is_shutdown():
@@ -139,12 +145,12 @@ if __name__ == '__main__':
         # 画像の二値化のための範囲指定。HSVで。
 #        lower = np.array([-30, 100, 50]) # red
 #        upper = np.array([30, 255, 255]) # red
-#        lower = np.array([30, 100, 50]) # yellow
-#        upper = np.array([50, 255, 255]) # yellow
+        lower = np.array([30, 100, 50]) # yellow
+        upper = np.array([50, 255, 255]) # yellow
 #        lower = np.array([120, 100, 50]) # blue
 #        upper = np.array([140, 255, 255]) # blue
-        lower = np.array([40, 100, 50]) # green
-        upper = np.array([60, 255, 255]) # green
+#        lower = np.array([40, 100, 50]) # green
+#        upper = np.array([60, 255, 255]) # green
 
         # 値が指定した範囲内の画素は255、範囲外の画素を0にする二値化
         mask_image = cv2.inRange(hsv_image, lower, upper)
@@ -167,5 +173,25 @@ if __name__ == '__main__':
         # 加工した画像をROS Topicの形式に変換してpublish
         image_msg = bot.bridge.cv2_to_imgmsg(processed_image, "bgr8")
         bot.image_pub.publish(image_msg)
+
+
+        # 真ん中を向くように方向転換
+        diff_pix = cx - 320
+        anglular_z = 0
+
+        if abs(diff_pix) < 320 and diff_pix > 20:
+            anglular_z = -0.3
+        elif abs(diff_pix) < 320 and diff_pix < -20:
+            anglular_z = 0.3
+        else:
+            anglular_z = 0.0
+            
+        print(anglular_z)
+
+        twist = Twist()
+        twist.linear.x = 0; twist.linear.y = 0; twist.linear.z = 0
+        twist.angular.x = 0; twist.angular.y = 0; twist.angular.z = anglular_z
+        vel_pub.publish(twist)
+
 
         r.sleep()
