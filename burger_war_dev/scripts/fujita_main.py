@@ -1,15 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import rospy
-import random
-
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from sensor_msgs.msg import LaserScan
-
 import tf
-
-
 import actionlib
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 import actionlib_msgs
@@ -24,11 +19,11 @@ import math
 #import cv2
 
 
-class NaviBot():
+class SampleBot():
 
     waypoint_list = []
     # スタート地点付近
-    waypoint_list.append([-0.9,0.0,315])
+    waypoint_list.append([-0.9,0.0,290])
     waypoint_list.append([-0.9,0.0,0])
 
     # パティ横の壁
@@ -182,6 +177,6 @@ class NaviBot():
 
 
 if __name__ == '__main__':
-    rospy.init_node('navirun')
-    bot = NaviBot()
+    rospy.init_node('Samplerun')
+    bot = SampleBot()
     bot.strategy()
