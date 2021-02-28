@@ -165,6 +165,8 @@ if __name__ == '__main__':
             cx = int(mom["m10"]/mom["m00"])
             cy = int(mom["m01"]/mom["m00"])
         print(cx, cy)
+        print(cv2.__version__)
+        print(sys.version)
 
         # 求めた重心の位置を示すために紫色の点を描画
         color = (255, 0, 255)

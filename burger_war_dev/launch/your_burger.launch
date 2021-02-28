@@ -4,18 +4,13 @@
 
     <!-- You can change control program  -->
 
-    <!-- sample program node -->
 
-    <node pkg="burger_war_dev" type="randomRun.py" name="randomRun" output="screen"/>
 
-    <!-- END sample program node -->
-
-    <!-- Navigation sample program  -->
-    <!--
+    <!-- Navigation起動 -->
     <include file="$(find burger_navigation)/launch/burger_navigation.launch" />
-    <node pkg="burger_war_dev" type="navirun.py" name="navirun" output="screen"/>
-    -->
-    <!-- END Navigation sample program node -->
+
+    <node pkg="burger_war_dev" type="fujita_main.py" name="navirun" output="screen"/>
+
 
     <!-- End of your space  -->
 </launch>
