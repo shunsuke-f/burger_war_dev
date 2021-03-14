@@ -202,21 +202,27 @@ class SampleBot():
                 anglular_z = 0.0
 #                rospy.loginfo("diff_degree: %f", diff_degree)
 #                self.diff_pub(diff_degree)
-                if abs(self.enemy_direction_deg) > 10 and self.enemy_direction_deg > 180:
-                    anglular_z = -0.8
-                elif abs(self.enemy_direction_deg) > 10 and self.enemy_direction_deg < 181:
-                    anglular_z = 0.8
+
+                # 前方189度のみ監視する版(後ろを振り向くと的が取られることがある)
+                if abs(self.enemy_direction_deg) > 10 and self.enemy_direction_deg > 270:
+                    anglular_z = -1.5
+                elif abs(self.enemy_direction_deg) > 10 and self.enemy_direction_deg < 91:
+                    anglular_z = 1.5
                 else:
                     anglular_z = 0.0
 
                 """
-                if abs(diff_degree) > 10 and diff_degree > 180:
-                    anglular_z = 0.5
-                elif abs(diff_degree) > 10 and diff_degree < 181:
-                    anglular_z = -0.5
+                # 360度監視する板
+                if abs(self.enemy_direction_deg) > 10 and self.enemy_direction_deg > 180:
+                    anglular_z = -1.5
+                elif abs(self.enemy_direction_deg) > 10 and self.enemy_direction_deg < 181:
+                    anglular_z = 1.5
                 else:
                     anglular_z = 0.0
                 """
+
+                rospy.loginfo("enemy_direction_deg: {}".format(self.enemy_direction_deg))
+
                 twist = Twist()
                 twist.linear.x = 0; twist.linear.y = 0; twist.linear.z = 0
                 twist.angular.x = 0; twist.angular.y = 0; twist.angular.z = anglular_z

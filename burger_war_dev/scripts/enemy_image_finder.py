@@ -73,7 +73,7 @@ class EnemyImageFinder():
         mom = cv2.moments(mask_image)
         cx, cy = 0, 0
 #        rospy.loginfo("面積 %f", mom["m00"])
-        if mom["m00"] > 500000:
+        if mom["m00"] > 1000000:
             if "m00" in mom and "m10" in mom and "m01" in mom and mom["m00"] <> 0:
                 cx = int(mom["m10"]/mom["m00"])
                 cy = int(mom["m01"]/mom["m00"])

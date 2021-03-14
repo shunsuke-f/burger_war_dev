@@ -26,9 +26,9 @@ class EnemyPointsFinder():
 
     def __init__(self):
         
-        self.max_distance = 1.0 # 0.7
-        self.thresh_corner = 0.6 # 0.25
-        self.thresh_center = 0.5 # 0.35
+        self.max_distance = 0.8 # 0.7
+#        self.thresh_corner = 0.6 # 0.25
+#        self.thresh_center = 0.5 # 0.35
 
         self.pose_x = 0
         self.pose_y = 0
@@ -102,7 +102,7 @@ class EnemyPointsFinder():
         point_y = self.pose_y + dist * math.sin(self.th + ang_rad)
 
         #フィールド内かチェック
-        filed_size = 1.53 #1.53
+        filed_size = 1.3 #1.53
         if   point_y > (-point_x + filed_size):
             return False
         elif point_y < (-point_x - filed_size):
@@ -111,9 +111,28 @@ class EnemyPointsFinder():
             return False
         elif point_y < ( point_x - filed_size):
             return False
+        else:
+            #フィールド内の物体でないかチェック
+            #小さい方
+            locate = 0.53 # 0.53
+            radius = 0.3  #半径
+            large_radius = 0.5  #半径
+            if (pow((point_x - locate), 2) + pow((point_y - locate), 2)) < pow(radius, 2):
+                return False
+            elif (pow((point_x - locate), 2) + pow((point_y + locate), 2)) < pow(radius, 2):
+                return False
+            elif (pow((point_x + locate), 2) + pow((point_y - locate), 2)) < pow(radius, 2):
+                return False
+            elif (pow((point_x + locate), 2) + pow((point_y + locate), 2)) < pow(radius, 2):
+                return False
+            # 真ん中の大きい障害物
+            elif (pow(point_x, 2) + pow(point_y, 2)) < pow(radius, 2):
+                return False
+            else:
+                return True
 
-        #フィールド内の物体でないかチェック
-        locate = 0.53 # 0.53
+        """
+        locate = 0.60 # 0.53
         len_p1 = math.sqrt(pow((point_x - locate), 2) + pow((point_y - locate), 2))
         len_p2 = math.sqrt(pow((point_x - locate), 2) + pow((point_y + locate), 2))
         len_p3 = math.sqrt(pow((point_x + locate), 2) + pow((point_y - locate), 2))
@@ -126,6 +145,7 @@ class EnemyPointsFinder():
             #print(point_x, point_y, self.pose_x, self.pose_y, self.th, dist, ang_deg, ang_rad)
             #print(len_p1, len_p2, len_p3, len_p4, len_p5)
             return True
+        """
 
 
     def poseCallback(self, data):

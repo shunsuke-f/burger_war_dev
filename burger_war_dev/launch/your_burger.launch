@@ -10,12 +10,17 @@
     <include file="$(find burger_navigation)/launch/burger_navigation.launch" />
 
     <node pkg="burger_war_dev" type="fujita_main.py" name="Samplerun" output="screen"/>
-    <node pkg="burger_war_dev" type="enemy_image_finder.py" name="EnemyImageFinder" output="screen"/>
     <node pkg="burger_war_dev" type="enemy_points_finder.py" name="EnemyPointsFinder" output="screen"/>
+    <node pkg="burger_war_dev" type="enemy_image_finder.py" name="EnemyImageFinder" output="screen"/>
 
 <!--
 
+	<include file="$(find obstacle_detector)/launch/obstacle_detector.launch" />
 -->
+
+
+	<!-- obstacle detector -->
+
 
 
     <!-- End of your space  -->
